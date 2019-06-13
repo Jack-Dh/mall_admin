@@ -48,6 +48,9 @@
           prop="levelNumber"
           label="等级编号"
           width="180">
+          <template slot-scope="scope">
+            lv.{{scope.$index+1}}
+          </template>
         </el-table-column>
         <el-table-column
           prop="levelName"
@@ -82,7 +85,7 @@
           label="成长值扣除数量"
           width="180">
           <template slot-scope="scope">
-            <el-input size="mini" type="number" v-model="scope.row.deductionQuantity"></el-input>
+            <el-input size="mini" type="number" disabled v-model="scope.row.deductionQuantity"></el-input>
           </template>
         </el-table-column>
       </el-table>
@@ -101,6 +104,7 @@
 
 <script>
   import { gradesave } from '@/api/user'
+  import { gradelist } from '@/api/user'
   import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
   export default {
     name: "level",
@@ -112,8 +116,8 @@
         radio: '1',
         buttonShow: false,//添加等级按钮
         levelListData: {
-          growValue:'1',//成长值依据(1:代表累计消费，2：代表累计积分)
-          levelTime:'1',//等级有效期(1:代表永久有效，2：代表每个自然年扣除成长值)
+          // growValue:'1',//成长值依据(1:代表累计消费，2：代表累计积分)
+          // levelTime:'1',//等级有效期(1:代表永久有效，2：代表每个自然年扣除成长值)
           //等级列表
           levelList:[
           {
@@ -135,7 +139,12 @@
         //保存会员等级会员规则
         let data=this.levelListData
         gradesave(data).then(res=>{
-          console.log(res)
+          this.$notify({
+            title: '成功',
+            message: '操作成功',
+            type: 'success'
+          });
+          this.queryLevel()
         }).catch(err=>{
            console.log(err)
         })
@@ -155,8 +164,18 @@
         if (this.levelListData.levelList.length >= 5) {
           this.buttonShow = true
         }
+      },
+      queryLevel(){
+        //等级管理查询
+        gradelist().then(res=>{
+          this.levelListData=res.data.data
+        }).catch(err=>{
+          console.log(err)
+        })
       }
-    }, created() {
+    },
+    created() {
+     this.queryLevel()
       if (this.levelListData.levelList.length >= 5) {
         this.buttonShow = true
       }
@@ -174,9 +193,8 @@
     line-height: 50px;
   }
 .levelListDataBox{
-  border: 1px dashed #ececec;
+  border-bottom: 1px dashed #ececec;
   width: 100%;
-  border-top: none;
 }
   .note {
     text-align: left;

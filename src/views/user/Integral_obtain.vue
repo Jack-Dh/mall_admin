@@ -1,8 +1,13 @@
 <template>
     <div class="app-container">
       <div class="Box" style="margin-top: 30px">
-        <div class="title">
-          <p>签到送积分</p>
+        <div class="title" style="display: flex;justify-content: space-between;align-items: center">
+          <span>签到送积分</span>
+          <el-switch
+            v-model="Integral_obtainList.signInStatus"
+            active-text="启用"
+            inactive-text="未启用">
+          </el-switch>
         </div>
 
         <el-row :gutter="20">
@@ -13,7 +18,7 @@
           <el-col :span="12">
             <div class="InpBox">
               <span>每天签到奖励</span>
-              <el-input style="width: 100px"></el-input>
+              <el-input style="width: 100px" type="number" v-model="Integral_obtainList.everyNumber"></el-input>
               <span>积分</span>
             </div>
           </el-col>
@@ -24,9 +29,9 @@
           <el-col :span="16" :offset="6">
             <div class="InpBox">
               <span>每连续</span>
-              <el-input style="width: 100px"></el-input>
+              <el-input style="width: 100px" type="number" v-model="Integral_obtainList.continueDays"></el-input>
               <span>天签到，奖励</span>
-              <el-input style="width: 100px"></el-input>
+              <el-input style="width: 100px" type="number" v-model="Integral_obtainList.continueNumber"></el-input>
               <span>积分</span>
             </div>
           </el-col>
@@ -96,7 +101,7 @@
 <!--        </el-row>-->
       </div>
       <p>
-        <el-button  type="primary">保存</el-button>
+        <el-button  type="primary" @click="integralsaveBtn">保存</el-button>
       </p>
     </div>
 
@@ -105,12 +110,44 @@
 </template>
 
 <script>
+  import { integrallist } from '@/api/user'
+  import { integralsave } from '@/api/user'
+  import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
     export default {
         name: "Integral_obtain",
       data(){
           return{
             radio:1,
+            Integral_obtainList:{
+              signInStatus:true,//签到送积分状态
+              everyNumber:null,//每天签到奖励多少积分
+              continueDays:null, //每连续几天
+              continueNumber:null,//奖励多少积分
+              addNumber:null,//每天递增奖励多少积分
+              addDays:null//最多奖励多少天后不再递增
+            }
           }
+      },
+      methods:{
+        integrallistQuery(){
+          //积分获取查询
+          integrallist().then(res=>{
+            console.log(res)
+          }).catch(err=>{
+            console.log(err)
+          })
+        },
+        integralsaveBtn(){
+          //积分获取保存
+          integralsave(this.Integral_obtainList).then(res=>{
+            console.log(res)
+          }).catch(err=>{
+            console.log(err)
+          })
+        },
+      },
+      created() {
+          this.integrallistQuery()
       }
     }
 </script>

@@ -405,7 +405,30 @@ export const asyncRouterMap = [
       }
     ]
   },
-
+  {
+    //物流模板
+    path:'/logistics',
+    component:Layout,
+    redirect:'noredirect',
+    alwaysShow:true,
+    name: 'logisticsManage',
+    meta:{
+      title:'物流管理',
+      icon:'chart'
+    },
+    children:[
+      {
+        path: 'freight',
+        component: () => import('@/views/logistics/freight'),
+        name: 'freight',
+        meta: {
+          perms: ['GET /admin/user/list'],
+          title: '运费模板',
+          noCache: true
+        }
+      },
+    ]
+  },
   {
     path: '/sys',
     component: Layout,
