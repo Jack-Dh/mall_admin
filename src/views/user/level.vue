@@ -5,14 +5,14 @@
       <tr>
         <th class="title">成长依据</th>
         <th class="radio">
-          <el-radio v-model="levelListData.growValue" label='1'>累计消费</el-radio>
+          <el-radio v-model="levelListData.growValueObject.growValue" label='1'>累计消费</el-radio>
         </th>
         <th class="note">默认成长值等于该会员的累计消费值，且成长值伴随着消费的增加而增加</th>
       </tr>
       <tr class="trbox">
         <th></th>
         <th class="radio">
-          <el-radio v-model="levelListData.growValue" label='2'>累计积分</el-radio>
+          <el-radio v-model="levelListData.growValueObject.growValue" label='2'>累计积分</el-radio>
         </th>
         <th class="note">默认成长值等于该会员的累计积分值，且成长值伴随着充值金额的增加而增加</th>
       </tr>
@@ -23,14 +23,14 @@
       <tr>
         <th class="title">等级有限期</th>
         <th class="radio">
-          <el-radio v-model="levelListData.levelTime" label='1'>永久有效</el-radio>
+          <el-radio v-model="levelListData.levelTimeObject.levelTime" label='1'>永久有效</el-radio>
         </th>
         <th class="note"></th>
       </tr>
       <tr>
         <th class="title"></th>
         <th class="radio">
-          <el-radio v-model="levelListData.levelTime" label='2'>每个自然年扣除成长值</el-radio>
+          <el-radio v-model="levelListData.levelTimeObject.levelTime" label='2'>每个自然年扣除成长值</el-radio>
         </th>
         <th class="note">成长值扣除后将根据剩余成长值重新计算等级</th>
       </tr>
@@ -117,6 +117,8 @@
         buttonShow: false,//添加等级按钮
         levelListData: {
           // growValue:'1',//成长值依据(1:代表累计消费，2：代表累计积分)
+          growValueObject:{growValue:'1'},
+          levelTimeObject:{levelTime:'1'},
           // levelTime:'1',//等级有效期(1:代表永久有效，2：代表每个自然年扣除成长值)
           //等级列表
           levelList:[
