@@ -171,6 +171,22 @@
         //等级管理查询
         gradelist().then(res=>{
           this.levelListData=res.data.data
+          console.log(res)
+          /**
+           *
+           * 赋值后判断等级列表是否为空，要是为空添加默认数据防止报错
+           * */
+          if (this.levelListData.levelList.length===0){
+            let datas = {
+              levelNumber:1 ,//等级编号
+              levelName: '基础会员',//等级名称
+              startQuantity:0,
+              endQuantity:500,
+              discountRate: null,//折扣率
+              deductionQuantity: null,//成长值扣除数量
+            }
+            this.levelListData.levelList.push(datas)
+          }
         }).catch(err=>{
           console.log(err)
         })
@@ -181,6 +197,7 @@
       if (this.levelListData.levelList.length >= 5) {
         this.buttonShow = true
       }
+
     }
   }
 </script>

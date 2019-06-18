@@ -27,7 +27,7 @@
 
       <el-table-column align="center" label="用户等级" prop="userLevel">
         <template slot-scope="scope">
-          <el-tag >{{ levelDic[scope.row.userLevel] }}</el-tag>
+          <el-tag >{{scope.row.userLevel}}</el-tag>
         </template>
       </el-table-column>
 
@@ -66,7 +66,6 @@ export default {
       },
       downloadLoading: false,
       genderDic: ['未知', '男', '女'],
-      levelDic: ['普通用户', 'VIP用户', '高级VIP用户'],
       statusDic: ['可用', '禁用', '注销']
     }
   },

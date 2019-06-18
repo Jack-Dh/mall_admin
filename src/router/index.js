@@ -36,6 +36,8 @@ export const constantRouterMap = [
       }
     ]
   },
+  // views/login/index
+  //views/logistics/addFreightpanel
   {
     path: '/login',
     component: () => import('@/views/login/index'),
@@ -428,10 +430,31 @@ export const asyncRouterMap = [
         }
       },
       {
+        path: 'deliverys',
+        component: () => import('@/views/logistics/deliverys'),
+        name: 'deliverys',
+        meta: {
+          perms: ['GET /admin/order/list', 'GET /admin/order/detail', 'POST /admin/order/ordership', 'POST /admin/order/orderrefund', 'POST /admin/order/orderreply'],
+          title: '发货管理',
+          noCache: true
+        }
+      },
+
+      // {
+      //   path: 'delivery',
+      //   component: () => import('@/views/logistics/delivery'),
+      //   name: 'delivery',
+      //   meta: {
+      //     perms: ['GET /admin/user/list'],
+      //     title: '发货管理',
+      //     noCache: true
+      //   }
+      // },
+
+      {
         path: 'addFreightpanel',
         component: () => import('@/views/logistics/addFreightpanel'),
         name: 'addFreightpanel',
-        hidden: true,
         meta: {
           title: '新增运费模板',
           noCache: true
