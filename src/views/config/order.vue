@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form ref="dataForm" :rules="rules" :model="dataForm" status-icon label-width="300px">
+    <el-form ref="dataForm"  :model="dataForm" status-icon label-width="300px">
       <el-form-item label="用户下单后超时" prop="litemall_order_unpaid">
         <el-input v-model="dataForm.litemall_order_unpaid" class="input-width">
           <template slot="append">分钟</template>
@@ -19,6 +19,13 @@
         </el-input>
         <span class="info">未评价商品，则取消评价资格</span>
       </el-form-item>
+      <el-form-item label="确认收货后超期" prop="litemall_order_comment">
+        <el-input v-model="dataForm.litemall_order_after" class="input-width">
+          <template slot="append">天</template>
+        </el-input>
+        <span class="info">未申请售后，则取消售后资格</span>
+      </el-form-item>
+
       <el-form-item>
         <el-button @click="cancel">取消</el-button>
         <el-button type="primary" @click="update">确定</el-button>

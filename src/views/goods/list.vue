@@ -57,7 +57,7 @@
       <el-table-column align="center" label="详情" prop="detail">
         <template slot-scope="scope">
           <el-dialog :visible.sync="detailDialogVisible" title="商品详情">
-            <div v-html="goodsDetail"/>
+            <div class="imgBox" v-html="goodsDetail"/>
           </el-dialog>
           <el-button type="primary" size="mini" @click="showDetail(scope.row.detail)">查看</el-button>
         </template>
@@ -103,6 +103,9 @@
 </template>
 
 <style>
+  .imgBox img{
+    width: 100%;
+  }
   .table-expand {
     font-size: 0;
   }

@@ -235,6 +235,16 @@ export const asyncRouterMap = [
         }
       },
       {
+        path: 'after-sales',
+        component: () => import('@/views/mall/after-sales'),
+        name: 'after-sales',
+        meta: {
+          perms: ['GET /admin/order/list', 'GET /admin/order/detail', 'POST /admin/order/ordership', 'POST /admin/order/orderrefund', 'POST /admin/order/orderreply'],
+          title: '售后管理',
+          noCache: true
+        }
+      },
+      {
         path: 'issue',
         component: () => import('@/views/mall/issue'),
         name: 'issue',
@@ -455,6 +465,7 @@ export const asyncRouterMap = [
         path: 'addFreightpanel',
         component: () => import('@/views/logistics/addFreightpanel'),
         name: 'addFreightpanel',
+        hidden:true,
         meta: {
           title: '新增运费模板',
           noCache: true
