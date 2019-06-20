@@ -12,6 +12,26 @@ export function listOrder(query) {
   })
 }
 
+export function aftersaleList(query) {
+  //会员售后列表
+  return request({
+    url:'/aftersale/list',
+    method:'get',
+    params:query,
+    paramsSerializer: function(params) {
+      return Qs.stringify(params, { arrayFormat: 'repeat' })
+    }
+  })
+}
+export function aftersaledetail(id) {
+  //会员售后详情
+  return request({
+    url:'aftersale/detail',
+    method:'get',
+    params:{id}
+  })
+}
+
 export function detailOrder(id) {
   return request({
     url: '/order/detail',
