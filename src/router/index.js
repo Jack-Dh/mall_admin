@@ -471,7 +471,17 @@ export const asyncRouterMap = [
           noCache: true
         }
       },
-      // addFreightpanel
+      {
+        path: 'updataFreight',
+        component: () => import('@/views/logistics/updataFreight'),
+        name: 'updataFreight',
+        hidden:true,
+        meta: {
+          title: '修改运费模板',
+          noCache: true
+        }
+      },
+      // updataFreight
     ]
   },
   {

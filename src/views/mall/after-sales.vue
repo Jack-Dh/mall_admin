@@ -62,6 +62,11 @@
           <el-tag>{{ scope.row.aftersaleStatus | aftersaleStatusFilter }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column align="center" label="处理方式" prop="aftersaleStatus">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.type | aftersaTypeFilter }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="退款金额" prop="refundAmount"/>
       <el-table-column align="center" label="申请时间" prop="addTime"/>
       <el-table-column align="center" label="操作" width="230" class-name="small-padding fixed-width">
@@ -249,6 +254,12 @@
     12: '维修中',
     13: '维修成功'
   }
+
+  const aftersaType = {
+    1: '维修',
+    2: '退款退货',
+    3: '仅退款',
+  }
   export default {
     name: 'after-sales',
     components: {Pagination},
@@ -258,8 +269,10 @@
       },
       aftersaleStatusFilter(status) {
         return aftersaleStatuIng[status]
+      },
+      aftersaTypeFilter(status){
+        return aftersaType[status]
       }
-
     },
     data() {
       return {
@@ -267,6 +280,7 @@
         total: 0,
         listLoading: true,
         aftersaleStatuIng,//售后状态
+        aftersaType,
         statusMapNew: [
           {
             label: '维修',

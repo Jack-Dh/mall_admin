@@ -41,7 +41,7 @@
 
 
         <el-form-item label="运送方式">
-          <el-checkbox-group @change="checkChangetype" v-model="addFreightData.transportModes">
+          <el-checkbox-group @change="checkChange" v-model="addFreightData.transportModes">
             <el-checkbox label="快递" name="type">
               <span>快递</span>
               <i class="el-icon-edit-outline"></i>
@@ -76,17 +76,18 @@
       </el-form>
       <!-- 设置配送区域及运费-->
       <!--      class="areaBlock"-->
-      <div v-for="(item,index) in addFreightData.transportModesList">
-        <div class="areaBlock_box">
-          <div class="divbox" ><p
-            style="margin: 0;display: flex;justify-content: space-between;padding-left: 5px;padding-right: 5px">
-            <span>设置可配送区域和运费</span>
-            <span>{{addFreightData.transportModesList[index][0].title}}</span>
-          </p>
-          </div>
-          <el-table border width="100%" :data="addFreightData.transportModesList[index]">
-            <el-table-column label="可能配送区域">
-              <template slot-scope="scope">
+      <div v-if="areaBlockShow">
+        <div v-for="(item,index) in addFreightData.transportModes" style="width: 90%">
+          <div class="areaBlock_box" v-if="item">
+            <div class="divbox" v-if="addFreightData.transportModes"><p
+              style="margin: 0;display: flex;justify-content: space-between;padding-left: 5px;padding-right: 5px">
+              <span>设置可配送区域和运费</span>
+              <span>{{addFreightData.transportModeList[index][0].title}}</span>
+            </p>
+            </div>
+            <el-table border width="100%" :data="addFreightData.transportModeList[index]">
+              <el-table-column label="可能配送区域">
+                <template slot-scope="scope">
 
                   <span>默认配送所有地区
                     <i class="el-icon-edit" style="margin-left: 5px" title="编辑运送区域"
@@ -94,96 +95,40 @@
                     <i v-if="scope.$index==0?false:true" @click="remFreightBtn(scope.row,index,scope.$index)"
                        class="el-icon-delete" style="margin-left: 5px" title="删除运送区域"></i>
                   </span>
-                <p>{{scope.row.deliveryAddress}}</p>
-              </template>
-            </el-table-column>
-            <el-table-column label="首件（个）">
-              <template slot-scope="scope">
-                <el-input v-model="scope.row.firstPiece"/>
-              </template>
-            </el-table-column>
-            <el-table-column label="运费（元）">
-              <template slot-scope="scope">
-                <el-input v-model="scope.row.freight"/>
-              </template>
-            </el-table-column>
-            <el-table-column label="续件（个）">
-              <template slot-scope="scope">
-                <el-input v-model="scope.row.continuate"/>
-              </template>
-            </el-table-column>
-            <el-table-column label="运费（元）">
-              <template slot-scope="scope">
-                <el-input v-model="scope.row.continuateFreight"/>
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="divbox"><p
-            style="margin: 0;padding-left: 5px;">
-            <i class="el-icon-edit"></i>
-            <span @click="addarea(index)">设置可配送区域和运费</span>
+                  <p>{{scope.row.deliveryAddress}}</p>
+                </template>
+              </el-table-column>
+              <el-table-column label="首件（个）">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.firstPiece"/>
+                </template>
+              </el-table-column>
+              <el-table-column label="运费（元）">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.freight"/>
+                </template>
+              </el-table-column>
+              <el-table-column label="续件（个）">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.continuate"/>
+                </template>
+              </el-table-column>
+              <el-table-column label="运费（元）">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.continuateFreight"/>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="divbox"><p
+              style="margin: 0;padding-left: 5px;">
+              <i class="el-icon-edit"></i>
+              <span @click="addarea(index)">设置可配送区域和运费</span>
 
-          </p>
+            </p>
+            </div>
           </div>
         </div>
-
-
       </div>
-
-
-<!--      <div v-if="areaBlockShow">-->
-<!--        <div v-for="(item,index) in addFreightData.transportModes" style="width: 90%">-->
-<!--          <div class="areaBlock_box" v-if="item">-->
-<!--            <div class="divbox" v-if="addFreightData.transportModes"><p-->
-<!--              style="margin: 0;display: flex;justify-content: space-between;padding-left: 5px;padding-right: 5px">-->
-<!--              <span>设置可配送区域和运费</span>-->
-<!--              <span>{{addFreightData.transportModesList[index][0].title}}</span>-->
-<!--            </p>-->
-<!--            </div>-->
-<!--            <el-table border width="100%" :data="addFreightData.transportModesList[index]">-->
-<!--              <el-table-column label="可能配送区域">-->
-<!--                <template slot-scope="scope">-->
-
-<!--                  <span>默认配送所有地区-->
-<!--                    <i class="el-icon-edit" style="margin-left: 5px" title="编辑运送区域"-->
-<!--                       @click="addFreightBtn(scope.row)"></i>-->
-<!--                    <i v-if="scope.$index==0?false:true" @click="remFreightBtn(scope.row,index,scope.$index)"-->
-<!--                       class="el-icon-delete" style="margin-left: 5px" title="删除运送区域"></i>-->
-<!--                  </span>-->
-<!--                  <p>{{scope.row.deliveryAddress}}</p>-->
-<!--                </template>-->
-<!--              </el-table-column>-->
-<!--              <el-table-column label="首件（个）">-->
-<!--                <template slot-scope="scope">-->
-<!--                  <el-input v-model="scope.row.firstPiece"/>-->
-<!--                </template>-->
-<!--              </el-table-column>-->
-<!--              <el-table-column label="运费（元）">-->
-<!--                <template slot-scope="scope">-->
-<!--                  <el-input v-model="scope.row.freight"/>-->
-<!--                </template>-->
-<!--              </el-table-column>-->
-<!--              <el-table-column label="续件（个）">-->
-<!--                <template slot-scope="scope">-->
-<!--                  <el-input v-model="scope.row.continuate"/>-->
-<!--                </template>-->
-<!--              </el-table-column>-->
-<!--              <el-table-column label="运费（元）">-->
-<!--                <template slot-scope="scope">-->
-<!--                  <el-input v-model="scope.row.continuateFreight"/>-->
-<!--                </template>-->
-<!--              </el-table-column>-->
-<!--            </el-table>-->
-<!--            <div class="divbox"><p-->
-<!--              style="margin: 0;padding-left: 5px;">-->
-<!--              <i class="el-icon-edit"></i>-->
-<!--              <span @click="addarea(index)">设置可配送区域和运费</span>-->
-
-<!--            </p>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
       <router-link to="/logistics/freight">
         <el-button @click="dialogVisible = false">取 消</el-button>
       </router-link>
@@ -261,46 +206,47 @@
           transportModes: [],//运送方式
           priceMode: '',//计价方式
           freightCalculate: '',//运费计算方式
-          transportModesList: [
-            // [{
-            //   title: '快递',
-            //   deliveryAddress: '',//运送到
-            //   firstPiece: null,//首件
-            //   freight: '',// 运费
-            //   continuate: null,// 续件
-            //   continuateFreight: ''//续件运费
-            // }], [{
-            //   title: 'EMS',
-            //   deliveryAddress: true,//运送到
-            //   firstPiece: null,//首件
-            //   freight: '',// 运费
-            //   continuate: null,// 续件
-            //   continuateFreight: ''//续件运费
-            // }], [{
-            //   title: '平邮',
-            //   deliveryAddress: true,//运送到
-            //   firstPiece: null,//首件
-            //   freight: '',// 运费
-            //   continuate: null,// 续件
-            //   continuateFreight: ''//续件运费
-            // }], [{
-            //   title: '空运',
-            //   deliveryAddress: true,//运送到
-            //   firstPiece: null,//首件
-            //   freight: '',// 运费
-            //   continuate: null,// 续件
-            //   continuateFreight: ''//续件运费
-            // }], [{
-            //   title: '海运',
-            //   deliveryAddress: true,//运送到
-            //   firstPiece: null,//首件
-            //   freight: '',// 运费
-            //   continuate: null,// 续件
-            //   continuateFreight: ''//续件运费
-            // }]
+          transportModeList: [
+            [{
+              title: '快递',
+              deliveryAddress: '',//运送到
+              firstPiece: null,//首件
+              freight: '',// 运费
+              continuate: null,// 续件
+              continuateFreight: ''//续件运费
+            }], [{
+              title: 'EMS',
+              deliveryAddress: true,//运送到
+              firstPiece: null,//首件
+              freight: '',// 运费
+              continuate: null,// 续件
+              continuateFreight: ''//续件运费
+            }], [{
+              title: '平邮',
+              deliveryAddress: true,//运送到
+              firstPiece: null,//首件
+              freight: '',// 运费
+              continuate: null,// 续件
+              continuateFreight: ''//续件运费
+            }], [{
+              title: '空运',
+              deliveryAddress: true,//运送到
+              firstPiece: null,//首件
+              freight: '',// 运费
+              continuate: null,// 续件
+              continuateFreight: ''//续件运费
+            }], [{
+              title: '海运',
+              deliveryAddress: true,//运送到
+              firstPiece: null,//首件
+              freight: '',// 运费
+              continuate: null,// 续件
+              continuateFreight: ''//续件运费
+            }]
           ]//可配送区域数据
         },//新建模板数据信息
         areaBlockShow: false,//设置可配送区域显示隐藏
+        Arr:[]
       }
     },
     methods: {
@@ -342,8 +288,8 @@
       },
       remFreightBtn(data, index, i) {
         //移除可配送区域按钮
-        let indexNum = this.addFreightData.transportModesList[index].indexOf(data);//获取当前要移除的数据在数据数组中的索引
-        this.addFreightData.transportModesList[index].splice(indexNum, 1)
+        let indexNum = this.addFreightData.transportModeList[index].indexOf(data);//获取当前要移除的数据在数据数组中的索引
+        this.addFreightData.transportModeList[index].splice(indexNum, 1)
       },
       addFreightBtn(data) {
         //编辑可配送区域按钮
@@ -397,10 +343,9 @@
           continuate: null,// 续件
           continuateFreight: ''//续件运费
         }
-        this.addFreightData.transportModesList[i].push(a)
+        this.addFreightData.transportModeList[i].push(a)
       },
-      chackradio(e) {
-
+      chackradio() {
         //运费计算方式选中按钮
         if (this.addFreightData.freightCalculate === '买家承担运费' && this.addFreightData.transportModes.length !== 0) {
           this.areaBlockShow = true
@@ -410,28 +355,9 @@
       },
       checkChange(e) {
         //运送方式选择
+
         if (this.addFreightData.freightCalculate === '买家承担运费' && this.addFreightData.transportModes.length !== 0) {
           this.areaBlockShow = true
-        } else {
-          this.areaBlockShow = false
-        }
-      },
-      checkChangetype(e) {
-        //运送方式选择
-        if (this.addFreightData.freightCalculate === '买家承担运费' && this.addFreightData.transportModes.length !== 0) {
-          this.areaBlockShow = true
-          console.log(e)
-          let a= [{
-            title: e[e.length-1],
-            deliveryAddress: '',//运送到
-            firstPiece: null,//首件
-            freight: '',// 运费
-            continuate: null,// 续件
-            continuateFreight: ''//续件运费
-          }]
-          this.addFreightData.transportModesList.push(a)
-
-
         } else {
           this.areaBlockShow = false
         }
@@ -442,7 +368,7 @@
           console.log(res)
           this.$notify.success({
             title: '成功',
-            message: '添加成功'
+            message: '确认发货成功'
           })
           this.$router.push('/logistics/freight')
         }).catch(err=>{
@@ -456,9 +382,16 @@
 
     },
     created() {
-      this.City()
+      this.addFreightData=this.$route.query.data
 
 
+      console.log( this.addFreightData)
+      this.addFreightData.transportModeList.forEach(item=>{
+        this.Arr.push([item])
+      })
+      this.addFreightData.transportModeList=this.Arr
+      console.log(this.Arr)
+      console.log( this.addFreightData)
     },
     components: {treeTransfer} // 注册
   }
