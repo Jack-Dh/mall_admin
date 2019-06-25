@@ -63,3 +63,19 @@ export function replyComment(data) {
     data
   })
 }
+export function refund(data) {
+  //确认退款
+  return request({
+    url: '/aftersale/refund ',
+    method: 'post',
+    data
+  })
+}
+export function acceptApi(data){
+  //确认退款
+  return request({
+    url: '/aftersale/update',
+    method: 'post',
+    data
+  })
+}

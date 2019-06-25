@@ -5,9 +5,9 @@
     <div class="filter-container">
       <el-input v-model="listQuery.userId" clearable class="filter-item" style="width: 200px;" placeholder="请输入用户ID"/>
       <el-input v-model="listQuery.orderSn" clearable class="filter-item" style="width: 200px;" placeholder="请输入订单编号"/>
-      <el-select v-model="listQuery.orderStatusArray" multiple style="width: 200px" class="filter-item" placeholder="请选择订单状态">
-        <el-option v-for="(key, value) in statusMap" :key="key" :label="key" :value="value"/>
-      </el-select>
+<!--      <el-select v-model="listQuery.orderStatusArray" multiple style="width: 200px" class="filter-item" placeholder="请选择订单状态">-->
+<!--        <el-option v-for="(key, value) in statusMap" :key="key" :label="key" :value="value"/>-->
+<!--      </el-select>-->
       <el-button v-permission="['GET /admin/order/list']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
       <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">导出</el-button>
     </div>
@@ -179,7 +179,7 @@ export default {
         limit: 20,
         id: undefined,
         name: undefined,
-        orderStatusArray: [],
+        orderStatusArray: [201],
         sort: 'add_time',
         order: 'desc'
       },

@@ -3,12 +3,13 @@
 
     <!-- 查询和其他操作 -->
     <div class="filter-container">
-      <el-input v-model="listQuery.aftersaleSn" clearable class="filter-item" style="width: 200px;" placeholder="请输入售后编号"/>
+      <el-input v-model="listQuery.aftersaleSn" clearable class="filter-item" style="width: 200px;"
+                placeholder="请输入售后编号"/>
       <el-input v-model="listQuery.orderSn" clearable class="filter-item" style="width: 200px;" placeholder="请输入订单编号"/>
       <el-select v-model="listQuery.type" multiple style="width: 200px" class="filter-item" placeholder="请选择售后方式">
         <el-option v-for="item in statusMapNew" :value="item.value" :label="item.label"/>
       </el-select>
-      <el-select v-model="listQuery.status"  style="width: 200px" class="filter-item" placeholder="请选择售后状态">
+      <el-select v-model="listQuery.status" style="width: 200px" class="filter-item" placeholder="请选择售后状态">
         <el-option v-for="(key, value) in aftersaleStatuIng" :key="key" :label="key" :value="value"/>
       </el-select>
       <el-button v-permission="['GET /admin/order/list']" class="filter-item" type="primary" icon="el-icon-search"
@@ -67,7 +68,6 @@
           <el-tag>{{ scope.row.type | aftersaTypeFilter }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="退款金额" prop="refundAmount"/>
       <el-table-column align="center" label="申请时间" prop="addTime"/>
       <el-table-column align="center" label="操作" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -80,11 +80,15 @@
           </el-button>
 
           <div style="margin-top: 5px">
-            <el-button style="width: 80px" v-permission="['POST /admin/order/ship']" type="success" size="mini"
-                       @click="handleShip(scope.row)">确认退款
+            <el-button v-if="scope.row.aftersaleStatus===1" style="width: 80px"
+                       v-permission="['POST /admin/order/ship']" type="success" size="mini"
+                       @click="refundBtn(scope.row)" :disabled="scope.row.auditing">确认退款
+            </el-button>
+            <el-button v-else style="width: 80px" v-permission="['POST /admin/order/ship']" type="success" size="mini"
+                       @click="acceptApiBtn(scope.row)" :disabled="scope.row.auditing">受理
             </el-button>
             <el-button style="width: 80px" v-permission="['POST /admin/order/refund']" size="mini"
-                       @click="handleRefund(scope.row)">拒绝
+                       @click="RefusedBtn(scope.row)" :disabled="scope.row.auditing">拒绝
             </el-button>
           </div>
         </template>
@@ -157,32 +161,39 @@
     <!-- 售后详情对话框 -->
     <el-dialog :visible.sync="afterDialogVisible" title="售后详情" width="800">
 
-      <el-form :data="orderDetail" label-position="left">
-        <el-form-item label="售后编号">
-          <span>{{ afterDetaildata.aftersaleSn }}</span>
-        </el-form-item>
+      <div style="display: flex;justify-content: space-between;">
+        <el-form :data="orderDetail" label-position="left">
+          <el-form-item label="售后编号">
+            <span>{{ afterDetaildata.aftersaleSn }}</span>
+          </el-form-item>
 
-        <el-form-item label="申请时间">
-          <span>{{ afterDetaildata.addTime }}</span>
-        </el-form-item>
-        <el-form-item label="售后原由">
-          <span>{{ afterDetaildata.reason }}</span>
-        </el-form-item>
-        <el-form-item label="商品信息">
-          <el-table :data="goodsArr" border fit highlight-current-row>
-            <el-table-column align="center" label="商品名称" prop="goodsName"/>
-            <el-table-column align="center" label="商品编号" prop="goodsSn"/>
-            <el-table-column align="center" label="货品价格" prop="price"/>
-            <el-table-column align="center" label="货品数量" prop="number"/>
-            <el-table-column align="center" label="货品图片" prop="picUrl">
-              <template slot-scope="scope">
-                <img :src="scope.row.picUrl" width="40">
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-form-item>
+          <el-form-item label="申请时间">
+            <span>{{ afterDetaildata.addTime }}</span>
+          </el-form-item>
+          <el-form-item label="处理方式">
+            <span>{{ afterDetaildata.type | aftersaTypeFilter }}</span>
+          </el-form-item>
+          <el-form-item label="售后原由">
+            <span>{{ afterDetaildata.reason }}</span>
+          </el-form-item>
+          <el-form-item label="商品信息">
+            <el-table :data="goodsArr" border fit highlight-current-row>
+              <el-table-column align="center" label="商品名称" prop="goodsName"/>
+              <el-table-column align="center" label="商品编号" prop="goodsSn"/>
+              <el-table-column align="center" label="货品价格" prop="price"/>
+              <el-table-column align="center" label="货品数量" prop="number"/>
+              <el-table-column align="center" label="货品图片" prop="picUrl">
+                <template slot-scope="scope">
+                  <img :src="scope.row.picUrl" width="40">
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-form-item>
 
-      </el-form>
+        </el-form>
+        <el-button style="height: 40px" v-if="refundbtnShow" type="primary" size="mini" @click="refundBtn(afterDetaildata)">退款</el-button>
+      </div>
+
     </el-dialog>
 
     <!-- 发货对话框 -->
@@ -203,13 +214,15 @@
     </el-dialog>
 
     <!-- 退款对话框 -->
-    <el-dialog :visible.sync="refundDialogVisible" title="退款">
-      <el-form ref="refundForm" :model="refundForm" status-icon label-position="left" label-width="100px"
+    <el-dialog :visible.sync="refundDialogVisible" title="退款" width="500px">
+      <el-form ref="refundForm" :model="refunData" status-icon label-position="left" label-width="100px"
                style="width: 400px; margin-left:50px;">
         <el-form-item label="退款金额" prop="refundMoney">
-          <el-input v-model="refundForm.refundMoney" :disabled="true"/>
+          <el-input v-model="refunData.refundAmount" ref="refunData" :max="refunData.price"
+                    :placeholder="refunData.price"/>
         </el-form-item>
       </el-form>
+      <!--      refundForm-->
       <div slot="footer" class="dialog-footer">
         <el-button @click="refundDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="confirmRefund">确定</el-button>
@@ -224,7 +237,16 @@
 </style>
 
 <script>
-  import {listOrder, shipOrder, refundOrder, detailOrder, aftersaleList, aftersaledetail} from '@/api/order'
+  import {
+    listOrder,
+    shipOrder,
+    refundOrder,
+    detailOrder,
+    aftersaleList,
+    aftersaledetail,
+    refund,
+    acceptApi
+  } from '@/api/order'
   import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
   import checkPermission from '@/utils/permission' // 权限判断函数
 
@@ -270,7 +292,7 @@
       aftersaleStatusFilter(status) {
         return aftersaleStatuIng[status]
       },
-      aftersaTypeFilter(status){
+      aftersaTypeFilter(status) {
         return aftersaType[status]
       }
     },
@@ -301,9 +323,10 @@
           orderStatusArray: [],
           sort: 'add_time',
           order: 'desc',
-          aftersaleSn:'',//售后编号
-          status:null,//售后状态
-          type:[],//处理方式
+          aftersaleSn: '',//售后编号
+          status: null,//售后状态
+          type: [],//处理方式
+
         },
         statusMap,
         orderDialogVisible: false,//订单详情
@@ -333,6 +356,8 @@
         refundDialogVisible: false,
         downloadLoading: false,
         goodsArr: [],//商品信息列表
+        refunData: {},//退款数据
+        refundbtnShow:false,//退款详情退款按钮
       }
     },
     created() {
@@ -341,6 +366,75 @@
     },
     methods: {
       checkPermission,
+      refundBtn(data) {
+        //确认退款
+        console.log(data)
+        this.refunData = data
+
+        this.refundDialogVisible = true
+        // this.$prompt('请输入退款金额', '提示', {
+        //   confirmButtonText: '确定',
+        //   cancelButtonText: '取消',
+        //   inputPattern: /[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?/,
+        //   inputErrorMessage: '邮箱格式不正确'
+        // }).then(() => {
+        //   refund(data).then(res => {
+        //     this.$notify.success({
+        //       title: '成功',
+        //       message: '操作成功'
+        //     })
+        //     this.this.aftersaleListQuery()
+        //   }).catch(err => {
+        //     console.log(err)
+        //   })
+        // })
+      },
+      acceptApiBtn(data) {
+        //受理
+        this.$confirm('是否受理当前售后申请?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          let newdata = data
+          newdata.aftersaleStatus = 11
+          newdata.auditing = true
+          acceptApi(newdata).then(res => {
+            this.$notify.success({
+              title: '成功',
+              message: '操作成功'
+            })
+            this.this.aftersaleListQuery()
+          }).catch(err => {
+            console.log(err)
+          })
+        })
+
+      },
+      RefusedBtn(data) {
+        //拒绝售后申请
+
+        this.$confirm('是否拒绝当前售后申请?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          let newdata = data
+          newdata.aftersaleStatus = 7
+          newdata.auditing = true
+          acceptApi(newdata).then(res => {
+            this.$notify.success({
+              title: '成功',
+              message: '操作成功'
+            })
+            this.this.aftersaleListQuery()
+          }).catch(err => {
+            console.log(err)
+          })
+        })
+
+
+      },
       getList() {
         this.listLoading = true
         listOrder(this.listQuery).then(response => {
@@ -392,8 +486,15 @@
             number: this.afterDetaildata.number,
             picUrl: this.afterDetaildata.picUrl,
           }
+          this.goodsArr=[]
           this.goodsArr.push(goods)
         })
+        if (row.auditing==true&&row.type==2){
+          this.refundbtnShow=true
+        } else {
+          this.refundbtnShow=false
+        }
+        // refundbtnShow
         this.afterDialogVisible = true
       },
       handleShip(row) {
@@ -435,30 +536,28 @@
         })
       },
       confirmRefund() {
-        this.$refs['refundForm'].validate((valid) => {
-          if (valid) {
-            refundOrder(this.refundForm).then(response => {
-              this.refundDialogVisible = false
-              this.$notify.success({
-                title: '成功',
-                message: '确认退款成功'
-              })
-              this.getList()
-            }).catch(response => {
-              this.$notify.error({
-                title: '失败',
-                message: response.data.errmsg
-              })
-            })
-          }
+        //退款
+        this.refunData.auditing = true
+        refund(this.refunData).then(res => {
+          this.$notify.success({
+            title: '成功',
+            message: '确认退款成功'
+          })
+          this.aftersaleListQuery()
+        }).catch(err => {
+          this.$notify.error({
+            title: '失败',
+            message: err.data.errmsg
+          })
         })
+
       },
       handleDownload() {
         this.downloadLoading = true
         import('@/vendor/Export2Excel').then(excel => {
-          const tHeader = ['订单ID', '订单编号', '用户ID', '订单状态', '是否删除', '收货人', '收货联系电话', '收货地址']
-          const filterVal = ['id', 'orderSn', 'userId', 'orderStatus', 'isDelete', 'consignee', 'mobile', 'address']
-          excel.export_json_to_excel2(tHeader, this.list, filterVal, '订单信息')
+          const tHeader = ['商品信息', '订单编号', '退款编号', '售后状态', '处理方式', '申请时间']
+          const filterVal = ['picUrl', 'orderSn', 'aftersaleSn', 'aftersaleStatus', 'type', 'addTime']
+          excel.export_json_to_excel2(tHeader, this.list, filterVal, '售后信息')
           this.downloadLoading = false
         })
       }

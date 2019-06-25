@@ -478,7 +478,7 @@ export const asyncRouterMap = [
         hidden:true,
         meta: {
           title: '修改运费模板',
-          noCache: true
+          noCache: true,
         }
       },
       // updataFreight

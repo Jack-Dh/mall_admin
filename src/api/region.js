@@ -40,3 +40,11 @@ export function deletetemplate(data) {
     data
   })
 }
+export function updatetemplate(data) {
+  //修改运费模板
+  return request({
+    url:'/freight/template/update',
+    method:'post',
+    data
+  })
+}

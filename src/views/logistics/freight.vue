@@ -22,7 +22,7 @@
 
 
         </div>
-        <el-table border :data="item.transportModeList" stripe style="width: 100%">
+        <el-table border :data="item.transportModeLists" stripe style="width: 100%">
           <el-table-column label="运送方式" prop="title"></el-table-column>
           <el-table-column label="运送到">
             <template slot-scope="scope">
