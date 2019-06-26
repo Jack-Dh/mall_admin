@@ -215,17 +215,20 @@
 
     <!-- 退款对话框 -->
     <el-dialog :visible.sync="refundDialogVisible" title="退款" width="500px">
-      <el-form ref="refundForm" :model="refunData" status-icon label-position="left" label-width="100px"
+      <el-form ref="refunData" :model="refunData"  status-icon label-position="left" label-width="100px"
                style="width: 400px; margin-left:50px;">
-        <el-form-item label="退款金额" prop="refundMoney">
-          <el-input v-model="refunData.refundAmount" ref="refunData" :max="refunData.price"
+        <el-form-item label="退款金额" prop="refundAmount"
+                      :rules="[
+            { required: true, message: '必须填写', trigger: 'blur' }
+           ]">
+          <el-input v-model="refunData.refundAmount"  :max="refunData.price"
                     :placeholder="refunData.price"/>
         </el-form-item>
       </el-form>
       <!--      refundForm-->
       <div slot="footer" class="dialog-footer">
         <el-button @click="refundDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmRefund">确定</el-button>
+        <el-button type="primary" @click="submitFormafter('refunData')">确定</el-button>
       </div>
     </el-dialog>
 
@@ -366,6 +369,17 @@
     },
     methods: {
       checkPermission,
+      submitFormafter(refunData) {
+        this.$refs[refunData].validate((valid) => {
+          if (valid) {
+            alert('submit!');
+            this.confirmRefund()
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
       refundBtn(data) {
         //确认退款
         console.log(data)
@@ -535,7 +549,7 @@
           this.$refs['refundForm'].clearValidate()
         })
       },
-      confirmRefund() {
+      confirmRefund(refunData) {
         //退款
         this.refunData.auditing = true
         refund(this.refunData).then(res => {

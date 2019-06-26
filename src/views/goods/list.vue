@@ -7,7 +7,12 @@
       <el-input v-model="listQuery.name" clearable class="filter-item" style="width: 200px;" placeholder="请输入商品名称"/>
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
       <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
-      <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">导出</el-button>
+      <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download"
+                 @click="handleDownload">导出
+      </el-button>
+      <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-upload2"
+                 @click="importGoodspanel=true">导入
+      </el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -93,30 +98,77 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit"
+                @pagination="getList"/>
+
+    <!--    导入商品-->
+    <el-dialog
+      title="导入商品"
+      :visible.sync="importGoodspanel"
+      width="600px"
+    >
+        <span style="margin-bottom: 10px;display: block">
+          商品链接
+        </span>
+      <div v-for="(item,index) in linkGoods">
+        <div class="linkbox">
+          <el-select v-model="item.type" slot="prepend" placeholder="请选择">
+            <el-option label="淘宝" value="1"></el-option>
+            <el-option label="天猫" value="2"></el-option>
+          </el-select>
+          <el-input v-model="item.url" class="input-with-select" >
+            <!--            /(http|https):\/\/([\w.]+\/?)\S*/　-->
+            <!--            onkeyup="value=value.replace(/[^http[s]{0,1}:\/\/([\w.]+\/?)\S*]/g,'')"-->
+          </el-input>
+
+
+          <el-button size="mini" @click="addlinkbtn" style="margin-left: 10px" type="primary"
+                     icon="el-icon-plus"></el-button>
+          <el-button v-if="index>0?true:false" size="mini" @click="deletelinkbtn(index)" type="primary"
+                     icon="el-icon-minus"></el-button>
+        </div>
+
+      </div>
+
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="importGoodspanel = false">取 消</el-button>
+    <el-button type="primary" @click="addlinksavebtn">确 定</el-button>
+  </span>
+    </el-dialog>
+
 
     <el-tooltip placement="top" content="返回顶部">
-      <back-to-top :visibility-height="100" />
+      <back-to-top :visibility-height="100"/>
     </el-tooltip>
 
   </div>
 </template>
 
 <style>
-  .imgBox img{
+  .linkbox {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px
+  }
+
+  .imgBox img {
     width: 100%;
   }
+
   .table-expand {
     font-size: 0;
   }
+
   .table-expand label {
     width: 100px;
     color: #99a9bf;
   }
+
   .table-expand .el-form-item {
     margin-right: 0;
     margin-bottom: 0;
   }
+
   .gallery {
     width: 80px;
     margin-right: 10px;
@@ -124,85 +176,115 @@
 </style>
 
 <script>
-import { listGoods, deleteGoods } from '@/api/goods'
-import BackToTop from '@/components/BackToTop'
-import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+  import {listGoods, deleteGoods} from '@/api/goods'
+  import BackToTop from '@/components/BackToTop'
+  import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
-export default {
-  name: 'GoodsList',
-  components: { BackToTop, Pagination },
-  data() {
-    return {
-      list: [],
-      total: 0,
-      listLoading: true,
-      listQuery: {
-        page: 1,
-        limit: 20,
-        goodsSn: undefined,
-        name: undefined,
-        sort: 'add_time',
-        order: 'desc'
-      },
-      goodsDetail: '',
-      detailDialogVisible: false,
-      downloadLoading: false
-    }
-  },
-  created() {
-    this.getList()
-  },
-  methods: {
-    getList() {
-      this.listLoading = true
-      listGoods(this.listQuery).then(response => {
-        this.list = response.data.data.list
-        this.total = response.data.data.total
-        this.listLoading = false
-      }).catch(() => {
-        this.list = []
-        this.total = 0
-        this.listLoading = false
-      })
+  export default {
+    name: 'GoodsList',
+    components: {BackToTop, Pagination},
+    data() {
+      return {
+        list: [],
+        total: 0,
+        listLoading: true,
+        listQuery: {
+          page: 1,
+          limit: 20,
+          goodsSn: undefined,
+          name: undefined,
+          sort: 'add_time',
+          order: 'desc'
+        },
+        goodsDetail: '',
+        detailDialogVisible: false,
+        downloadLoading: false,
+        importGoodspanel: false,//商品导入面板
+        linkGoods: [{url: '', type: '1'}],//商品链接
+      }
     },
-    handleFilter() {
-      this.listQuery.page = 1
+    created() {
       this.getList()
     },
-    handleCreate() {
-      this.$router.push({ path: '/goods/create' })
-    },
-    handleUpdate(row) {
-      this.$router.push({ path: '/goods/edit', query: { id: row.id }})
-    },
-    showDetail(detail) {
-      this.goodsDetail = detail
-      this.detailDialogVisible = true
-    },
-    handleDelete(row) {
-      deleteGoods(row).then(response => {
-        this.$notify.success({
-          title: '成功',
-          message: '删除成功'
+    methods: {
+      addlinksavebtn() {
+        //保存商品链接
+        console.log(this.linkGoods)
+      },
+
+
+
+      addlinkbtn() {
+        //添加商品链接文本框
+        let linkobj = {
+          url: "",
+          type: "1"
+        }
+        this.linkGoods.push(linkobj)
+      }
+      ,
+      deletelinkbtn(i) {
+        //移除商品链接文本框
+        this.linkGoods.splice(i, 1)
+      }
+      ,
+      getList() {
+        this.listLoading = true
+        listGoods(this.listQuery).then(response => {
+          this.list = response.data.data.list
+          this.total = response.data.data.total
+          this.listLoading = false
+        }).catch(() => {
+          this.list = []
+          this.total = 0
+          this.listLoading = false
         })
-        const index = this.list.indexOf(row)
-        this.list.splice(index, 1)
-      }).catch(response => {
-        this.$notify.error({
-          title: '失败',
-          message: response.data.errmsg
+      }
+      ,
+      handleFilter() {
+        this.listQuery.page = 1
+        this.getList()
+      }
+      ,
+      handleCreate() {
+        this.$router.push({path: '/goods/create'})
+      }
+      ,
+      handleUpdate(row) {
+        this.$router.push({path: '/goods/edit', query: {id: row.id}})
+      }
+      ,
+      showDetail(detail) {
+        console.log(detail)
+        this.goodsDetail = detail
+        this.detailDialogVisible = true
+      }
+      ,
+      handleDelete(row) {
+        deleteGoods(row).then(response => {
+          this.$notify.success({
+            title: '成功',
+            message: '删除成功'
+          })
+          const index = this.list.indexOf(row)
+          this.list.splice(index, 1)
+        }).catch(response => {
+          this.$notify.error({
+            title: '失败',
+            message: response.data.errmsg
+          })
         })
-      })
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['商品ID', '商品编号', '名称', '专柜价格', '当前价格', '是否新品', '是否热品', '是否在售', '首页主图', '宣传图片列表', '商品介绍', '详细介绍', '商品图片', '商品单位', '关键字', '类目ID', '品牌商ID']
-        const filterVal = ['id', 'goodsSn', 'name', 'counterPrice', 'retailPrice', 'isNew', 'isHot', 'isOnSale', 'listPicUrl', 'gallery', 'brief', 'detail', 'picUrl', 'goodsUnit', 'keywords', 'categoryId', 'brandId']
-        excel.export_json_to_excel2(tHeader, this.list, filterVal, '商品信息')
-        this.downloadLoading = false
-      })
+      }
+      ,
+      handleDownload() {
+        this.downloadLoading = true
+        import('@/vendor/Export2Excel').then(excel => {
+          const tHeader = ['商品ID', '商品编号', '名称', '专柜价格', '当前价格', '是否新品', '是否热品', '是否在售', '首页主图', '宣传图片列表', '商品介绍', '详细介绍', '商品图片', '商品单位', '关键字', '类目ID', '品牌商ID']
+          const filterVal = ['id', 'goodsSn', 'name', 'counterPrice', 'retailPrice', 'isNew', 'isHot', 'isOnSale', 'listPicUrl', 'gallery', 'brief', 'detail', 'picUrl', 'goodsUnit', 'keywords', 'categoryId', 'brandId']
+          excel.export_json_to_excel2(tHeader, this.list, filterVal, '商品信息')
+          this.downloadLoading = false
+        })
+      }
     }
   }
-}
 </script>

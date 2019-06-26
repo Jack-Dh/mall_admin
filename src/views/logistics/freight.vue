@@ -2,7 +2,7 @@
   <div id="app-container">
 
 
-    <div style="background-color: #f7f7f7">
+    <div style="background-color: #f7f7f7;height: 100vh">
       <div class="addFreight">
         <router-link to="/logistics/addFreightpanel">
           <el-button>新增运费模板</el-button>
@@ -22,7 +22,7 @@
 
 
         </div>
-        <el-table border :data="item.transportModeLists" stripe style="width: 100%">
+        <el-table  :data="item.transportModeLists" stripe style="width: 100%">
           <el-table-column label="运送方式" prop="title"></el-table-column>
           <el-table-column label="运送到">
             <template slot-scope="scope">
@@ -219,11 +219,14 @@
     },
     created() {
       this.createtemplateQuery()
+      //获取窗口高度
+      // console.log(document.body.clientHeight&&document.documentElement.clientHeight)
     }
   }
 </script>
 
 <style scoped>
+
   .title {
     display: flex;
     justify-content: space-between;

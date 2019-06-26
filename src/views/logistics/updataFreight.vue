@@ -21,7 +21,7 @@
 
 
     <el-card class="box-card">
-      <el-form :model="addFreightData" label-width="120px">
+      <el-form :model="addFreightData" ref="addFreightData" label-width="120px">
         <el-form-item
           label="模板名称"
           prop="name"
@@ -32,7 +32,10 @@
           <el-input v-model="addFreightData.name"></el-input>
         </el-form-item>
 
-        <el-form-item label="运费计算方式">
+        <el-form-item label="运费计算方式"  prop="freightCalculate"
+                      :rules="[
+            { required: true, message: '必须选择', trigger: 'change' }
+           ]">
           <el-radio-group v-model="addFreightData.freightCalculate">
             <el-radio @change="chackradio" label="卖家承担运费"></el-radio>
             <el-radio @change="chackradio" label="买家承担运费"></el-radio>
@@ -41,7 +44,7 @@
 
 
         <el-form-item label="运送方式">
-          <el-checkbox-group @change="checkChangeType" v-model="addFreightData.transportModes">
+          <el-checkbox-group @change="checkChangeType" v-model="transportModess">
             <el-checkbox label="快递" name="type">
               <span>快递</span>
               <i class="el-icon-edit-outline"></i>
@@ -65,7 +68,10 @@
           </el-checkbox-group>
         </el-form-item>
 
-        <el-form-item label="计价方式">
+        <el-form-item label="计价方式" prop="priceMode"
+                      :rules="[
+            { required: true, message: '必须选择', trigger: 'change' }
+           ]">
           <el-radio-group v-model="addFreightData.priceMode">
             <el-radio label="按件数"></el-radio>
             <el-radio label="按重量"></el-radio>
@@ -119,6 +125,12 @@
               </template>
             </el-table-column>
           </el-table>
+          <div class="divbox" v-if="addFreightData.transportModes">
+            <p @click="addarea(index)" style="margin: 0;display: flex;justify-content: space-between;padding-left: 5px;padding-right: 5px">
+              <span>设置可配送区域和运费</span>
+            </p>
+          </div>
+
         </div>
 
       </div>
@@ -127,7 +139,7 @@
         <el-button @click="dialogVisible = false">取 消</el-button>
       </router-link>
 
-      <el-button type="primary" @click="testData">确 定</el-button>
+      <el-button type="primary" @click="submitForm('addFreightData')">确 定</el-button>
 
     </el-card>
 
@@ -240,10 +252,21 @@
           // ]//可配送区域数据
         },//新建模板数据信息
         areaBlockShow: false,//设置可配送区域显示隐藏
-        arr: []
+        transportModess: [],
+        arr: [],
       }
     },
     methods: {
+      submitForm(addFreightData) {
+        this.$refs[addFreightData].validate((valid) => {
+          if (valid) {
+            this.testData()
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
       checkChangeType(e) {
         //运送方式选择
         /***
@@ -252,61 +275,51 @@
          * false表示数据不存在，点击时添加数据
          *
          * **/
-        console.log(e)
-        if (e.length==0){
-          this.addFreightData.transportModeList = []
-        }
         if (this.addFreightData.freightCalculate === '买家承担运费' && this.addFreightData.transportModes.length !== 0) {
           this.areaBlockShow = true
           if (this.addFreightData.transportModes === []) {
             let data = [{
               title: e[e.length - 1],
-              deliveryAddress: '',//运送到
-              firstPiece: null,//首件
-              freight: '',// 运费
-              continuate: null,// 续件
-              continuateFreight: ''//续件运费
+              deliveryAddress: '所有地区',//运送到
+              firstPiece: 1,//首件
+              freight: 0.00,// 运费
+              continuate: 1,// 续件
+              continuateFreight: 0.00//续件运费
             }]
             let darta
             darta = data
             this.addFreightData.transportModeList.push(darta)
+            this.arr = this.transportModess
 
-
-            this.arr = this.addFreightData.transportModes
-            console.log(this.addFreightData.transportModeList)
           } else {
-            let state = this.addFreightData.transportModes.every((item, index) => {
-              return this.arr.indexOf(item) > -1
+            //获取已勾选数据数组，与需要传输给服务器的运送方式勾选数组相比较，找出不一样的元素
+            let list = this.arr.filter(item => {
+              return e.indexOf(item) === -1
             })
 
-            this.arr = this.addFreightData.transportModes
-            if (state) {
-              // this.arr.splice(index,1)
-              let index
-              e.forEach((item, i) => {
-                if (this.arr.indexOf(item) > -1) {
-                  index = i
-                }
+            if (list.length !== 0) {
+              let indexarr = this.addFreightData.transportModeList.filter((item, index) => {
+                //获取选中的数据在数组中的位置
+                return list.indexOf(item[0].title) !== -1
               })
-              this.addFreightData.transportModeList.splice(index + 1, 1)
+              let i = this.addFreightData.transportModeList.indexOf(indexarr[0])
+              this.addFreightData.transportModeList.splice(i, 1)
+              this.arr = this.transportModess
             } else {
+              //当前选中数据在数组中不存在，则添加一条
               let data = [{
                 title: e[e.length - 1],
-                deliveryAddress: '',//运送到
-                firstPiece: null,//首件
-                freight: '',// 运费
-                continuate: null,// 续件
-                continuateFreight: ''//续件运费
+                deliveryAddress: '所有地区',//运送到
+                firstPiece: 1,//首件
+                freight: 0.00,// 运费
+                continuate: 1,// 续件
+                continuateFreight: 0.00//续件运费
               }]
-
               this.addFreightData.transportModeList.push(data)
-              this.arr = this.addFreightData.transportModes
+              this.arr = this.transportModess
               console.log(this.addFreightData.transportModeList)
             }
-
           }
-
-
         } else {
           this.areaBlockShow = false
         }
@@ -396,11 +409,11 @@
         //设置可配送区域和运费添加按钮
         console.log(i)
         let a = {
-          deliveryAddress: [],//运送到
-          firstPiece: null,//首件
-          freight: '',// 运费
-          continuate: null,// 续件
-          continuateFreight: ''//续件运费
+          deliveryAddress: '所有地区',//运送到
+          firstPiece: 1,//首件
+          freight: 0.00,// 运费
+          continuate: 1,// 续件
+          continuateFreight: 0.00//续件运费
         }
         this.addFreightData.transportModeList[i].push(a)
       },
@@ -427,6 +440,7 @@
       testData() {
 
         let data = this.addFreightData
+        this.addFreightData.transportModes = this.transportModess  //运送方式赋值
         data.transportModeLists = []
         this.addFreightData.transportModeList.forEach(item => {
           data.transportModeLists.push(item[0])
@@ -459,9 +473,10 @@
 
         tempData.transportModeList = a
         this.addFreightData = tempData
-        this.arr=this.addFreightData.transportModes
-        this.addFreightData=JSON.stringify(this.addFreightData)
-        this.addFreightData=JSON.parse(this.addFreightData)
+        this.arr = this.addFreightData.transportModes
+        this.transportModess = this.addFreightData.transportModes
+        this.addFreightData = JSON.stringify(this.addFreightData)
+        this.addFreightData = JSON.parse(this.addFreightData)
         console.log(this.addFreightData)
         console.log(this.addFreightData.transportModeList)
       }
