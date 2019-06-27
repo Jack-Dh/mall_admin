@@ -79,3 +79,11 @@ export function acceptApi(data){
     data
   })
 }
+export function getOrderTracesByJson(query){
+  //物流信息查询
+  return request({
+    url: '/logistics/getOrderTracesByJson',
+    method: 'get',
+    params:query
+  })
+}

@@ -294,7 +294,7 @@ export const asyncRouterMap = [
         name: 'goodsCreate',
         meta: {
           perms: ['POST /admin/goods/create'],
-          title: '商品上架',
+          title: '添加商品',
           noCache: true
         }
       },

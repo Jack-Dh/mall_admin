@@ -372,7 +372,6 @@
       submitFormafter(refunData) {
         this.$refs[refunData].validate((valid) => {
           if (valid) {
-            alert('submit!');
             this.confirmRefund()
           } else {
             console.log('error submit!!');

@@ -46,3 +46,19 @@ export function listCatAndBrand() {
     method: 'get'
   })
 }
+
+export function geturl(data) {
+  //根据链接导入商品
+  return request({
+    url: '/getgoods/url',
+    method: 'post',
+    data
+  })
+}
+export function templateselect() {
+  return request({
+    //查询所有物流模板
+    url: '/freight/template/select',
+    method: 'get'
+  })
+}

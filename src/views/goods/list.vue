@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
 
+
     <!-- 查询和其他操作 -->
     <div class="filter-container">
       <el-input v-model="listQuery.goodsSn" clearable class="filter-item" style="width: 200px;" placeholder="请输入商品编号"/>
@@ -110,25 +111,33 @@
         <span style="margin-bottom: 10px;display: block">
           商品链接
         </span>
-      <div v-for="(item,index) in linkGoods">
-        <div class="linkbox">
-          <el-select v-model="item.type" slot="prepend" placeholder="请选择">
-            <el-option label="淘宝" value="1"></el-option>
-            <el-option label="天猫" value="2"></el-option>
-          </el-select>
-          <el-input v-model="item.url" class="input-with-select" >
-            <!--            /(http|https):\/\/([\w.]+\/?)\S*/　-->
-            <!--            onkeyup="value=value.replace(/[^http[s]{0,1}:\/\/([\w.]+\/?)\S*]/g,'')"-->
-          </el-input>
-
-
-          <el-button size="mini" @click="addlinkbtn" style="margin-left: 10px" type="primary"
-                     icon="el-icon-plus"></el-button>
-          <el-button v-if="index>0?true:false" size="mini" @click="deletelinkbtn(index)" type="primary"
-                     icon="el-icon-minus"></el-button>
-        </div>
-
+      <el-select v-model="linkGoods.type" placeholder="请选择" style="margin-bottom: 10px;width: 100px">
+        <el-option label="天猫"  value="1"></el-option>
+        <el-option label="淘宝" disabled value="2"></el-option>
+      </el-select>
+      <div class="linkbox" v-for="(item,index) in linkGoods.url" :key="index">
+        <el-input v-model="linkGoods.url[index]"></el-input>
+        <el-button size="mini" @click="addlinkbtn" style="margin-left: 10px" type="primary"
+                   icon="el-icon-plus"></el-button>
+        <el-button v-if="index>0?true:false" size="mini" @click="deletelinkbtn(index)" type="primary"
+                   icon="el-icon-minus"></el-button>
       </div>
+
+      <!--      <div>-->
+
+
+      <!--        <div class="linkbox"  v-for="(item,index) in linkGoods.url">-->
+      <!--          {{item}}-->
+      <!--          <el-input v-model="item.url" class="input-with-select"></el-input>-->
+
+
+      <!--          <el-button size="mini" @click="addlinkbtn" style="margin-left: 10px" type="primary"-->
+      <!--                     icon="el-icon-plus"></el-button>-->
+      <!--          <el-button v-if="index>0?true:false" size="mini" @click="deletelinkbtn(index)" type="primary"-->
+      <!--                     icon="el-icon-minus"></el-button>-->
+      <!--        </div>-->
+
+      <!--      </div>-->
 
       <span slot="footer" class="dialog-footer">
     <el-button @click="importGoodspanel = false">取 消</el-button>
@@ -176,7 +185,7 @@
 </style>
 
 <script>
-  import {listGoods, deleteGoods} from '@/api/goods'
+  import {listGoods, deleteGoods, geturl} from '@/api/goods'
   import BackToTop from '@/components/BackToTop'
   import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -200,7 +209,10 @@
         detailDialogVisible: false,
         downloadLoading: false,
         importGoodspanel: false,//商品导入面板
-        linkGoods: [{url: '', type: '1'}],//商品链接
+        linkGoods: {
+          type: '',
+          url: ['']
+        },//商品链接
       }
     },
     created() {
@@ -210,22 +222,27 @@
       addlinksavebtn() {
         //保存商品链接
         console.log(this.linkGoods)
+        geturl(this.linkGoods).then(res => {
+          console.log(res)
+        }).catch(err => {
+          console.log(err)
+        })
       },
-
 
 
       addlinkbtn() {
         //添加商品链接文本框
-        let linkobj = {
-          url: "",
-          type: "1"
-        }
-        this.linkGoods.push(linkobj)
+        // let linkobj = {
+        //   url: "1",
+        //
+        // }
+        this.linkGoods.url.push('')
+
       }
       ,
       deletelinkbtn(i) {
         //移除商品链接文本框
-        this.linkGoods.splice(i, 1)
+        this.linkGoods.url.splice(i, 1)
       }
       ,
       getList() {

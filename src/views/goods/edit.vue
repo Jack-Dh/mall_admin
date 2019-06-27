@@ -32,10 +32,10 @@
             <el-radio :label="true">热卖</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="是否在售" prop="isOnSale">
+        <el-form-item label="是否上架" prop="isOnSale">
           <el-radio-group v-model="goods.isOnSale">
-            <el-radio :label="true">在售</el-radio>
-            <el-radio :label="false">未售</el-radio>
+            <el-radio :label="true">上架</el-radio>
+            <el-radio :label="false">下架</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -239,6 +239,57 @@
       </el-dialog>
     </el-card>
 
+    <el-card class="box-card">
+      <h3>物流信息</h3>
+      <el-row :gutter="20" type="flex" align="middle" style="padding:20px 0;">
+        <el-col :span="10">
+          <el-select v-model="templevalue" placeholder="请选择" @change="changeselect">
+            <el-option
+              v-for="item in optionstemple"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-col>
+      </el-row>
+
+      <div style="border: 1px solid #ececec;line-height: 40px;" v-for="item in templedata">
+        <el-table :data="item.transportModeLists" stripe style="width: 100%">
+          <el-table-column label="运送方式" prop="title"></el-table-column>
+          <el-table-column label="运送到">
+            <template slot-scope="scope">
+              <span>{{scope.row.deliveryAddress}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="首件(个)">
+            <template slot-scope="scope">
+              <span>{{scope.row.firstPiece}}</span>
+            </template>
+
+          </el-table-column>
+          <el-table-column label="运费(元)">
+            <template slot-scope="scope">
+              <span>{{scope.row.freight}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="续件(个)">
+            <template slot-scope="scope">
+              <span>{{scope.row.continuate}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="续件运费(元)">
+            <template slot-scope="scope">
+              <span>{{scope.row.continuateFreight}}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+
+      </div>
+
+
+    </el-card>
+
     <div class="op-container">
       <el-button @click="handleCancel">取消</el-button>
       <el-button type="primary" @click="handleEdit">更新商品</el-button>
@@ -285,7 +336,7 @@
 </style>
 
 <script>
-import { detailGoods, editGoods, listCatAndBrand } from '@/api/goods'
+import { detailGoods, editGoods, listCatAndBrand ,templateselect} from '@/api/goods'
 import { createStorage, uploadPath } from '@/api/storage'
 import Editor from '@tinymce/tinymce-vue'
 import { MessageBox } from 'element-ui'
@@ -296,6 +347,10 @@ export default {
   components: { Editor },
   data() {
     return {
+      optionstemple: [],//物流模板选择框
+      templevalue: 0,//物流模板选择的数据索引
+      templedatalist: [],//服务端返回物流模板总数据信息
+      templedata: [],//展示模板信息
       uploadPath,
       newKeywordVisible: false,
       newKeyword: '',
@@ -360,9 +415,39 @@ export default {
     }
   },
   created() {
+    this.templateselectQuery()
     this.init()
+
   },
   methods: {
+    changeselect() {
+      //选择物流模板信息
+      // templevalue:'',//物流模板选择的数据索引
+      //   templedatalist:[],//服务端返回物流模板总数据信息
+      //   templedata:[],//展示模板信息
+      this.templedata = []
+      this.templedata.push(this.templedatalist[this.templevalue])
+      console.log(this.templedata)
+      console.log(this.templevalue)
+      console.log(this.templedatalist[this.templevalue])
+    },
+    templateselectQuery() {
+      //查询所有物流模板
+      templateselect().then(res => {
+        // this.optionstemple
+        this.templedatalist = res.data.data
+        console.log(this.templedata)
+        this.optionstemple = []
+        res.data.data.forEach((item, index) => {
+          let d = {label: item.name, value: index}
+          this.optionstemple.push(d)
+        })
+        // this.templedatalist = res.data.data
+        // this.templedata = []
+        // this.templedata.push(res.data.data[0])
+        console.log(res)
+      })
+    },
     init: function() {
       if (this.$route.query.id == null) {
         return
@@ -370,11 +455,27 @@ export default {
 
       const goodsId = this.$route.query.id
       detailGoods(goodsId).then(response => {
+        this.templedata=[]
         this.goods = response.data.data.goods
         this.specifications = response.data.data.specifications
         this.products = response.data.data.products
         this.attributes = response.data.data.attributes
         this.categoryIds = response.data.data.categoryIds
+        this.templedata.push(response.data.data.freightTemplate)
+        console.log(1)
+        console.log(this.templedata)
+        console.log(response)
+          /**
+           * 获取当前模板在模板库的索引
+           * */
+        let frename=response.data.data.freighfreightTemplate.name
+        this.optionstemple.forEach((item,index)=>{
+          if (item.name==frename) {
+            this.templevalue=index
+          }
+        })
+
+
 
         this.galleryFileList = []
         for (var i = 0; i < this.goods.gallery.length; i++) {

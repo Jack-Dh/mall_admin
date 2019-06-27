@@ -5,11 +5,16 @@
     <div class="filter-container">
       <el-input v-model="listQuery.userId" clearable class="filter-item" style="width: 200px;" placeholder="请输入用户ID"/>
       <el-input v-model="listQuery.orderSn" clearable class="filter-item" style="width: 200px;" placeholder="请输入订单编号"/>
-      <el-select v-model="listQuery.orderStatusArray" multiple style="width: 200px" class="filter-item" placeholder="请选择订单状态">
+      <el-select v-model="listQuery.orderStatusArray" multiple style="width: 200px" class="filter-item"
+                 placeholder="请选择订单状态">
         <el-option v-for="(key, value) in statusMap" :key="key" :label="key" :value="value"/>
       </el-select>
-      <el-button v-permission="['GET /admin/order/list']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
-      <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">导出</el-button>
+      <el-button v-permission="['GET /admin/order/list']" class="filter-item" type="primary" icon="el-icon-search"
+                 @click="handleFilter">查找
+      </el-button>
+      <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download"
+                 @click="handleDownload">导出
+      </el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -33,18 +38,30 @@
 
       <el-table-column align="center" label="物流单号" prop="shipSn"/>
 
-      <el-table-column align="center" label="物流渠道" prop="shipChannel"/>
+      <el-table-column align="center" label="物流渠道" prop="shipChannel">
+        <template slot-scope="scope">
+          {{scope.row.shipChannel|courierFilter}}
+        </template>
+
+      </el-table-column>
 
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button v-permission="['GET /admin/order/detail']" type="primary" size="mini" @click="handleDetail(scope.row)">详情</el-button>
-          <el-button v-permission="['POST /admin/order/ship']" v-if="scope.row.orderStatus==201" type="primary" size="mini" @click="handleShip(scope.row)">发货</el-button>
-          <el-button v-permission="['POST /admin/order/refund']" v-if="scope.row.orderStatus==202" type="primary" size="mini" @click="handleRefund(scope.row)">退款</el-button>
+          <el-button v-permission="['GET /admin/order/detail']" type="primary" size="mini"
+                     @click="handleDetail(scope.row)">详情
+          </el-button>
+          <el-button v-permission="['POST /admin/order/ship']" v-if="scope.row.orderStatus==201" type="primary"
+                     size="mini" @click="handleShip(scope.row)">发货
+          </el-button>
+          <el-button v-permission="['POST /admin/order/refund']" v-if="scope.row.orderStatus==202" type="primary"
+                     size="mini" @click="handleRefund(scope.row)">退款
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit"
+                @pagination="getList"/>
 
     <!-- 订单详情对话框 -->
     <el-dialog :visible.sync="orderDialogVisible" title="订单详情" width="800">
@@ -69,11 +86,11 @@
         </el-form-item>
         <el-form-item label="商品信息">
           <el-table :data="orderDetail.orderGoods" border fit highlight-current-row>
-            <el-table-column align="center" label="商品名称" prop="goodsName" />
-            <el-table-column align="center" label="商品编号" prop="goodsSn" />
-            <el-table-column align="center" label="货品规格" prop="specifications" />
-            <el-table-column align="center" label="货品价格" prop="price" />
-            <el-table-column align="center" label="货品数量" prop="number" />
+            <el-table-column align="center" label="商品名称" prop="goodsName"/>
+            <el-table-column align="center" label="商品编号" prop="goodsSn"/>
+            <el-table-column align="center" label="货品规格" prop="specifications"/>
+            <el-table-column align="center" label="货品价格" prop="price"/>
+            <el-table-column align="center" label="货品数量" prop="number"/>
             <el-table-column align="center" label="货品图片" prop="picUrl">
               <template slot-scope="scope">
                 <img :src="scope.row.picUrl" width="40">
@@ -103,11 +120,27 @@
           <span>（确认收货时间）{{ orderDetail.order.confirmTime }}</span>
         </el-form-item>
       </el-form>
+      <el-collapse>
+        <el-collapse-item title="物流信息" name="1">
+          <el-timeline style="margin-left: 30px;margin-top: 10px">
+            <el-timeline-item
+              v-for="(activity, index) in OrderTraces"
+              :key="index"
+              :timestamp="activity.AcceptTime">
+              {{activity.AcceptStation}}
+            </el-timeline-item>
+          </el-timeline>
+        </el-collapse-item>
+
+      </el-collapse>
+
+
     </el-dialog>
 
     <!-- 发货对话框 -->
     <el-dialog :visible.sync="shipDialogVisible" title="发货">
-      <el-form ref="shipForm" :model="shipForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+      <el-form ref="shipForm" :model="shipForm" status-icon label-position="left" label-width="100px"
+               style="width: 400px; margin-left:50px;">
         <el-form-item label="快递公司" prop="shipChannel">
           <el-input v-model="shipForm.shipChannel"/>
         </el-form-item>
@@ -123,7 +156,8 @@
 
     <!-- 退款对话框 -->
     <el-dialog :visible.sync="refundDialogVisible" title="退款">
-      <el-form ref="refundForm" :model="refundForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+      <el-form ref="refundForm" :model="refundForm" status-icon label-position="left" label-width="100px"
+               style="width: 400px; margin-left:50px;">
         <el-form-item label="退款金额" prop="refundMoney">
           <el-input v-model="refundForm.refundMoney" :disabled="true"/>
         </el-form-item>
@@ -142,158 +176,195 @@
 </style>
 
 <script>
-import { listOrder, shipOrder, refundOrder, detailOrder } from '@/api/order'
-import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-import checkPermission from '@/utils/permission' // 权限判断函数
+  import {listOrder, shipOrder, refundOrder, detailOrder, getOrderTracesByJson} from '@/api/order'
+  import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+  import checkPermission from '@/utils/permission' // 权限判断函数
 
-const statusMap = {
-  101: '未付款',
-  102: '用户取消',
-  103: '系统取消',
-  201: '已付款',
-  202: '申请退款',
-  203: '已退款',
-  301: '已发货',
-  401: '用户收货',
-  402: '系统收货'
-}
-
-export default {
-  name: 'Order',
-  components: { Pagination },
-  filters: {
-    orderStatusFilter(status) {
-      return statusMap[status]
-    }
-  },
-  data() {
-    return {
-      list: [],
-      total: 0,
-      listLoading: true,
-      listQuery: {
-        page: 1,
-        limit: 20,
-        id: undefined,
-        name: undefined,
-        orderStatusArray: [],
-        sort: 'add_time',
-        order: 'desc'
+  const statusMap = {
+    101: '未付款',
+    102: '用户取消',
+    103: '系统取消',
+    201: '已付款',
+    202: '申请退款',
+    203: '已退款',
+    301: '已发货',
+    401: '用户收货',
+    402: '系统收货'
+  }
+  const courier = {
+    'SF': '顺丰速运',
+    'HTKY': '百世快递',
+    'ZTO': '中通快递',
+    'STO': '申通快递',
+    'YTO': '圆通速递',
+    'YD': '韵达速递',
+    'YZPY': '邮政快递包裹',
+    'EMS': 'EMS',
+    'HHTT': '天天快递',
+    'JD': '京东快递',
+    'UC': '优速快递',
+    'DBL': '德邦快递',
+    'ZJS': '宅急送',
+    'TNT': 'TNT快递',
+    'UPS': 'UPS',
+    'DHL': 'DHL',
+    'FEDEX': 'FEDEX联邦(国内件）',
+    'FEDEX_GJ': 'FEDEX联邦(国际件）'
+  }
+  export default {
+    name: 'Order',
+    components: {Pagination},
+    filters: {
+      orderStatusFilter(status) {
+        return statusMap[status]
       },
-      statusMap,
-      orderDialogVisible: false,
-      orderDetail: {
-        order: {},
-        user: {},
-        orderGoods: []
-      },
-      shipForm: {
-        orderId: undefined,
-        shipChannel: undefined,
-        shipSn: undefined
-      },
-      shipDialogVisible: false,
-      refundForm: {
-        orderId: undefined,
-        refundMoney: undefined
-      },
-      refundDialogVisible: false,
-      downloadLoading: false
-    }
-  },
-  created() {
-    this.getList()
-  },
-  methods: {
-    checkPermission,
-    getList() {
-      this.listLoading = true
-      listOrder(this.listQuery).then(response => {
-        this.list = response.data.data.list
-        this.total = response.data.data.total
-        this.listLoading = false
-      }).catch(() => {
-        this.list = []
-        this.total = 0
-        this.listLoading = false
-      })
+      courierFilter(status) {
+        return courier[status]
+      }
     },
-    handleFilter() {
-      this.listQuery.page = 1
+    data() {
+      return {
+        list: [],
+        total: 0,
+        listLoading: true,
+        listQuery: {
+          page: 1,
+          limit: 20,
+          id: undefined,
+          name: undefined,
+          orderStatusArray: [],
+          sort: 'add_time',
+          order: 'desc'
+        },
+        statusMap,
+        courier,
+        orderDialogVisible: false,
+        orderDetail: {
+          order: {},
+          user: {},
+          orderGoods: []
+        },
+        shipForm: {
+          orderId: undefined,
+          shipChannel: undefined,
+          shipSn: undefined
+        },
+        shipDialogVisible: false,
+        refundForm: {
+          orderId: undefined,
+          refundMoney: undefined
+        },
+        refundDialogVisible: false,
+        downloadLoading: false,
+        OrderTraces: [],//物流信息
+      }
+    },
+    created() {
       this.getList()
     },
-    handleDetail(row) {
-      detailOrder(row.id).then(response => {
-        this.orderDetail = response.data.data
-      })
-      this.orderDialogVisible = true
-    },
-    handleShip(row) {
-      this.shipForm.orderId = row.id
-      this.shipForm.shipChannel = row.shipChannel
-      this.shipForm.shipSn = row.shipSn
-
-      this.shipDialogVisible = true
-      this.$nextTick(() => {
-        this.$refs['shipForm'].clearValidate()
-      })
-    },
-    confirmShip() {
-      this.$refs['shipForm'].validate((valid) => {
-        if (valid) {
-          shipOrder(this.shipForm).then(response => {
-            this.shipDialogVisible = false
-            this.$notify.success({
-              title: '成功',
-              message: '确认发货成功'
-            })
-            this.getList()
-          }).catch(response => {
-            this.$notify.error({
-              title: '失败',
-              message: response.data.errmsg
-            })
-          })
+    methods: {
+      checkPermission,
+      getList() {
+        this.listLoading = true
+        listOrder(this.listQuery).then(response => {
+          this.list = response.data.data.list
+          this.total = response.data.data.total
+          this.listLoading = false
+        }).catch(() => {
+          this.list = []
+          this.total = 0
+          this.listLoading = false
+        })
+      },
+      handleFilter() {
+        this.listQuery.page = 1
+        this.getList()
+      },
+      handleDetail(row) {
+        detailOrder(row.id).then(response => {
+          this.orderDetail = response.data.data
+        })
+        this.orderDialogVisible = true
+        console.log(row)
+        let shidata = {
+          shipChannel: row.shipChannel,
+          shipSn: row.shipSn
         }
-      })
-    },
-    handleRefund(row) {
-      this.refundForm.orderId = row.id
-      this.refundForm.refundMoney = row.actualPrice
+        getOrderTracesByJson(shidata).then(res => {
+          console.log(res)
+          this.OrderTraces = res.data.Traces
+        }).catch(err => {
+          console.log(1)
+          console.log(err)
+          this.OrderTraces = err.data.Traces
+        })
+      },
+      handleShip(row) {
+        this.shipForm.orderId = row.id
+        this.shipForm.shipChannel = row.shipChannel
+        this.shipForm.shipSn = row.shipSn
 
-      this.refundDialogVisible = true
-      this.$nextTick(() => {
-        this.$refs['refundForm'].clearValidate()
-      })
-    },
-    confirmRefund() {
-      this.$refs['refundForm'].validate((valid) => {
-        if (valid) {
-          refundOrder(this.refundForm).then(response => {
-            this.refundDialogVisible = false
-            this.$notify.success({
-              title: '成功',
-              message: '确认退款成功'
+        this.shipDialogVisible = true
+        this.$nextTick(() => {
+          this.$refs['shipForm'].clearValidate()
+        })
+      },
+      confirmShip() {
+        this.$refs['shipForm'].validate((valid) => {
+          if (valid) {
+            shipOrder(this.shipForm).then(response => {
+              this.shipDialogVisible = false
+              this.$notify.success({
+                title: '成功',
+                message: '确认发货成功'
+              })
+              this.getList()
+            }).catch(response => {
+              this.$notify.error({
+                title: '失败',
+                message: response.data.errmsg
+              })
             })
-            this.getList()
-          }).catch(response => {
-            this.$notify.error({
-              title: '失败',
-              message: response.data.errmsg
+          }
+        })
+      },
+      handleRefund(row) {
+        this.refundForm.orderId = row.id
+        this.refundForm.refundMoney = row.actualPrice
+
+        this.refundDialogVisible = true
+        this.$nextTick(() => {
+          this.$refs['refundForm'].clearValidate()
+        })
+      },
+      confirmRefund() {
+        this.$refs['refundForm'].validate((valid) => {
+          if (valid) {
+            refundOrder(this.refundForm).then(response => {
+              this.refundDialogVisible = false
+              this.$notify.success({
+                title: '成功',
+                message: '确认退款成功'
+              })
+              this.getList()
+            }).catch(response => {
+              this.$notify.error({
+                title: '失败',
+                message: response.data.errmsg
+              })
             })
-          })
-        }
-      })
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['订单ID', '订单编号', '用户ID', '订单状态', '是否删除', '收货人', '收货联系电话', '收货地址']
-        const filterVal = ['id', 'orderSn', 'userId', 'orderStatus', 'isDelete', 'consignee', 'mobile', 'address']
-        excel.export_json_to_excel2(tHeader, this.list, filterVal, '订单信息')
-        this.downloadLoading = false
-      })
+          }
+        })
+      },
+      handleDownload() {
+        this.downloadLoading = true
+        import('@/vendor/Export2Excel').then(excel => {
+          const tHeader = ['订单ID', '订单编号', '用户ID', '订单状态', '是否删除', '收货人', '收货联系电话', '收货地址']
+          const filterVal = ['id', 'orderSn', 'userId', 'orderStatus', 'isDelete', 'consignee', 'mobile', 'address']
+          excel.export_json_to_excel2(tHeader, this.list, filterVal, '订单信息')
+          this.downloadLoading = false
+        })
+      }
     }
   }
-}
 </script>
