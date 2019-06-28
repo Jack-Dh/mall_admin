@@ -427,9 +427,7 @@ export default {
       //   templedata:[],//展示模板信息
       this.templedata = []
       this.templedata.push(this.templedatalist[this.templevalue])
-      console.log(this.templedata)
-      console.log(this.templevalue)
-      console.log(this.templedatalist[this.templevalue])
+
     },
     templateselectQuery() {
       //查询所有物流模板
@@ -462,19 +460,28 @@ export default {
         this.attributes = response.data.data.attributes
         this.categoryIds = response.data.data.categoryIds
         this.templedata.push(response.data.data.freightTemplate)
-        console.log(1)
-        console.log(this.templedata)
-        console.log(response)
           /**
            * 获取当前模板在模板库的索引
            * */
-        let frename=response.data.data.freighfreightTemplate.name
-        this.optionstemple.forEach((item,index)=>{
-          if (item.name==frename) {
-            this.templevalue=index
-          }
-        })
+          console.log(1)
+          console.log(response)
+        if (response.data.data.freightTemplate) {
+            /**
+             * 判断是否从淘宝、天猫获取的商品
+             * 默认添加物流模板库第一个模板
+             * */
+          let frename=response.data.data.freightTemplate.name
+          this.optionstemple.forEach((item,index)=>{
+            if (item.name==frename) {
+              console.log(item)
+              this.templevalue=index
+            }
+          })
+        }else {
+          this.templedata=[]
+          this.templedata.push(this.templedatalist[0])
 
+        }
 
 
         this.galleryFileList = []
@@ -505,7 +512,8 @@ export default {
         goods: this.goods,
         specifications: this.specifications,
         products: this.products,
-        attributes: this.attributes
+        attributes: this.attributes,
+        freightTemplate:this.templedata[0]
       }
       editGoods(finalGoods)
         .then(response => {

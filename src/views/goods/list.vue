@@ -85,9 +85,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="是否在售" prop="isOnSale">
+      <el-table-column align="center" label="是否上架" prop="isOnSale">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.isOnSale ? 'success' : 'error' ">{{ scope.row.isOnSale ? '在售' : '未售' }}</el-tag>
+          <el-tag :type="scope.row.isOnSale ? 'success' : 'error' ">{{ scope.row.isOnSale ? '上架' : '未上架' }}</el-tag>
         </template>
       </el-table-column>
 
@@ -210,7 +210,7 @@
         downloadLoading: false,
         importGoodspanel: false,//商品导入面板
         linkGoods: {
-          type: '',
+          type: '1',
           url: ['']
         },//商品链接
       }
@@ -223,7 +223,12 @@
         //保存商品链接
         console.log(this.linkGoods)
         geturl(this.linkGoods).then(res => {
-          console.log(res)
+          this.$notify.success({
+            title: '提示',
+            message: res.data.errmsg
+          })
+          this.importGoodspanel=false
+          this.getList()
         }).catch(err => {
           console.log(err)
         })

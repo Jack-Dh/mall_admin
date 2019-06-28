@@ -20,7 +20,7 @@
         <span class="info">未评价商品，则取消评价资格</span>
       </el-form-item>
       <el-form-item label="确认收货后超期" prop="litemall_order_comment">
-        <el-input v-model="dataForm.litemall_order_after" class="input-width">
+        <el-input v-model="dataForm.litemall_order_unaftersale" class="input-width">
           <template slot="append">天</template>
         </el-input>
         <span class="info">未申请售后，则取消售后资格</span>

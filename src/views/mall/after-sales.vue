@@ -356,7 +356,7 @@
           orderId: undefined,
           refundMoney: undefined
         },
-        refundDialogVisible: false,
+        refundDialogVisible: false,//退款对话框
         downloadLoading: false,
         goodsArr: [],//商品信息列表
         refunData: {},//退款数据
@@ -556,6 +556,7 @@
             title: '成功',
             message: '确认退款成功'
           })
+          this.refundDialogVisible=false
           this.aftersaleListQuery()
         }).catch(err => {
           this.$notify.error({

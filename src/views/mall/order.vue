@@ -281,11 +281,21 @@
         this.getList()
       },
       handleDetail(row) {
+        //查询商品信息、物流信息
+        // let shidata = {
+        //   shipChannel: row.shipChannel,
+        //   shipSn: row.shipSn
+        // }
+        // this.orderDialogVisible = true
+        // getOrderTracesByJson(shidata).then(res => {
+        //   console.log(res)
+        //   this.OrderTraces = res.data.Traces
+        // })
         detailOrder(row.id).then(response => {
           this.orderDetail = response.data.data
         })
         this.orderDialogVisible = true
-        console.log(row)
+
         let shidata = {
           shipChannel: row.shipChannel,
           shipSn: row.shipSn
