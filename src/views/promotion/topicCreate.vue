@@ -30,7 +30,7 @@
         <el-input v-model="topic.readCount"/>
       </el-form-item>
       <el-form-item label="专题商品" prop="goods">
-        <el-button style="float:right;" size="mini" type="primary" @click="handleCreate()">创建商品</el-button>
+        <el-button style="float:right;margin-bottom: 10px" size="mini" type="primary" @click="handleCreate()">创建商品</el-button>
 
         <!-- 查询结果 -->
         <el-table :data="goodsList" border fit highlight-current-row>
@@ -62,7 +62,7 @@
         <el-input v-model="listQuery.goodsSn" clearable class="filter-item" style="width: 200px;" placeholder="请输入商品编号"/>
         <el-input v-model="listQuery.name" clearable class="filter-item" style="width: 200px;" placeholder="请输入商品名称"/>
         <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
-        <el-table v-loading="listLoading" :data="list" element-loading-text="正在查询中。。。" border fit highlight-current-row @selection-change="handleSelectionChange">
+        <el-table style="margin-top: 10px" v-loading="listLoading" :data="list" element-loading-text="正在查询中。。。" border fit highlight-current-row @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"/>
           <el-table-column align="center" label="商品ID" prop="id"/>
           <el-table-column align="center" property="picUrl" label="图片">
@@ -220,16 +220,22 @@ export default {
     handleCreate() {
       this.listQuery = {
         page: 1,
-        limit: 5,
+        limit: 10,
         id: undefined,
         name: undefined,
         sort: 'add_time',
-        order: 'desc'
+        order: 'desc',
+        isOnSale:'1'
       }
       this.list = []
       this.total = 0
       this.selectedlist = []
       this.addVisiable = true
+      listGoods(this.listQuery).then(res=>{
+        this.list=res.data.data.list
+        this.total=res.data.data.total
+
+      })
     },
     confirmAdd() {
       const newGoodsIds = []

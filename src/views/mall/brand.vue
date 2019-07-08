@@ -137,6 +137,14 @@ export default {
       rules: {
         name: [
           { required: true, message: '品牌商名称不能为空', trigger: 'blur' }
+        ],
+        simpleDesc:[
+          { required: true, message: '介绍不能为空', trigger: 'blur' }
+        ],
+        floorPrice:[
+          {
+            required: true, message: '低价不能为空', trigger: 'blur'
+          }
         ]
       },
       downloadLoading: false
