@@ -43,7 +43,7 @@
         <el-form-item label="品牌商名称" prop="name">
           <el-input v-model="dataForm.name"/>
         </el-form-item>
-        <el-form-item label="介绍" prop="simpleDesc">
+        <el-form-item label="介绍" prop="desc">
           <el-input v-model="dataForm.desc"/>
         </el-form-item>
         <el-form-item label="品牌商图片" prop="picUrl">
@@ -138,7 +138,7 @@ export default {
         name: [
           { required: true, message: '品牌商名称不能为空', trigger: 'blur' }
         ],
-        simpleDesc:[
+        desc:[
           { required: true, message: '介绍不能为空', trigger: 'blur' }
         ],
         floorPrice:[
