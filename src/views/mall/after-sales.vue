@@ -410,8 +410,17 @@
           type: 'warning'
         }).then(() => {
           let newdata = data
-          newdata.aftersaleStatus = 11
+          // newdata.aftersaleStatus = 11
           newdata.auditing = true
+
+
+          if (newdata.type==1){
+            newdata.aftersaleStatus = 11
+          }else if (newdata.type==2){
+            newdata.aftersaleStatus = 4
+          }else if (newdata.type==3){
+            newdata.aftersaleStatus = 3
+          }
           acceptApi(newdata).then(res => {
             this.$notify.success({
               title: '成功',
@@ -503,7 +512,10 @@
           this.goodsArr.push(goods)
         })
         if (row.auditing==true&&row.type==2){
-          this.refundbtnShow=true
+         if (row.aftersaleStatus!==6){
+           this.refundbtnShow=true
+         }
+
         } else {
           this.refundbtnShow=false
         }
@@ -557,6 +569,8 @@
             message: '确认退款成功'
           })
           this.refundDialogVisible=false
+          this.refundbtnShow=false
+          this.afterDialogVisible=false
           this.aftersaleListQuery()
         }).catch(err => {
           this.$notify.error({

@@ -142,7 +142,10 @@
       <el-form ref="shipForm" :model="shipForm" status-icon label-position="left" label-width="100px"
                style="width: 400px; margin-left:50px;">
         <el-form-item label="快递公司" prop="shipChannel">
-          <el-input v-model="shipForm.shipChannel"/>
+          <el-select v-model="shipForm.shipChannel" class="filter-item" style="width: 300px" placeholder="请选择快递公司">
+            <el-option v-for="(key, value) in courier" :key="key" :label="key" :value="value"/>
+          </el-select>
+
         </el-form-item>
         <el-form-item label="快递编号" prop="shipSn">
           <el-input v-model="shipForm.shipSn"/>
@@ -211,6 +214,7 @@
     'FEDEX': 'FEDEX联邦(国内件）',
     'FEDEX_GJ': 'FEDEX联邦(国际件）'
   }
+
   export default {
     name: 'Order',
     components: {Pagination},
